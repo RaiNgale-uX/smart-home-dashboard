@@ -1,0 +1,234 @@
+<app-page-header
+  eyebrow="Actuação"
+  title="Controlo"
+  subtitle="Seleccione o modo de operação e comande a iluminação e o ar condicionado."
+/>
+
+<div class="grid">
+
+  <article class="card">
+    <div class="card-header">
+      <span class="card-title">Modo de operação</span>
+      <span class="card-subtitle">Reportado pelo ESP32: {{ reportedMode() }}</span>
+    </div>
+
+    <div class="mode-body">
+      <div class="segmented">
+        <button
+          class="segmented-btn"
+          [class.is-active]="cmd.mode() === 'AUTO'"
+          (click)="setMode('AUTO')"
+        >
+          Automático
+        </button>
+
+        <button
+          class="segmented-btn"
+          [class.is-active]="cmd.mode() === 'MANUAL'"
+          (click)="setMode('MANUAL')"
+        >
+          Manual
+        </button>
+      </div>
+
+      <p class="mode-help">
+        @if (cmd.mode() === 'AUTO') {
+          No modo automático, a iluminação e a climatização obedecem às regras definidas no ESP32.
+        } @else {
+          No modo manual, o utilizador controla directamente as cargas autorizadas abaixo.
+        }
+      </p>
+    </div>
+  </article>
+
+
+  <article class="card">
+    <div class="card-header">
+      <span class="card-title">Iluminação</span>
+      <span class="card-subtitle">
+        casa/cmd/iluminacao · casa/cmd/luz_interior
+      </span>
+    </div>
+
+    <div class="lamps-body">
+
+      <div class="lamp-row">
+        <div class="lamp-info">
+          <span class="lamp-label">Lâmpada Exterior</span>
+
+          <span class="lamp-sub">
+            {{ cmd.exteriorLamp() ? 'Ligada' : 'Desligada' }}
+          </span>
+        </div>
+
+        <button
+          class="switch"
+          [class.is-on]="cmd.exteriorLamp()"
+          [disabled]="!isManual()"
+          (click)="toggleExterior()"
+          role="switch"
+          [attr.aria-checked]="cmd.exteriorLamp()"
+        >
+          <span class="switch-knob"></span>
+        </button>
+      </div>
+
+
+      <div class="lamp-row">
+        <div class="lamp-info">
+          <span class="lamp-label">Lâmpada Interior</span>
+
+          <span class="lamp-sub">
+            {{ cmd.interiorLamp() ? 'Ligada' : 'Desligada' }}
+          </span>
+        </div>
+
+        <button
+          class="switch"
+          [class.is-on]="cmd.interiorLamp()"
+          [disabled]="!isManual()"
+          (click)="toggleInterior()"
+          role="switch"
+          [attr.aria-checked]="cmd.interiorLamp()"
+        >
+          <span class="switch-knob"></span>
+        </button>
+      </div>
+
+
+      @if (!isManual()) {
+        <p class="lamp-locked">
+          Mude para o modo Manual para comandar as lâmpadas directamente.
+        </p>
+      }
+
+    </div>
+  </article>
+
+
+  <article class="card">
+    <div class="card-header">
+      <span class="card-title">Climatização</span>
+      <span class="card-subtitle">
+        casa/cmd/ar
+      </span>
+    </div>
+
+    <div class="lamps-body">
+
+      <div class="lamp-row">
+        <div class="lamp-info">
+          <span class="lamp-label">Ar Condicionado</span>
+
+          <span class="lamp-sub">
+            {{ cmd.ac() ? 'Ligado' : 'Desligado' }}
+          </span>
+        </div>
+
+        <button
+          class="switch"
+          [class.is-on]="cmd.ac()"
+          [disabled]="!isManual()"
+          (click)="toggleAC()"
+          role="switch"
+          [attr.aria-checked]="cmd.ac()"
+        >
+          <span class="switch-knob"></span>
+        </button>
+      </div>
+
+
+      @if (!isManual()) {
+        <p class="lamp-locked">
+          Mude para o modo Manual para comandar o ar condicionado directamente.
+        </p>
+      }
+
+    </div>
+  </article>
+
+</div>
+
+
+<div class="card log-card">
+
+  <div class="card-header">
+    <span class="card-title">
+      Registo de comandos
+    </span>
+
+    <span class="card-subtitle">
+      Últimos comandos enviados para publicação MQTT
+    </span>
+  </div>
+
+
+  @if (cmd.log().length === 0) {
+
+    <p class="log-empty">
+      Ainda não foi enviado nenhum comando nesta sessão.
+    </p>
+
+  } @else {
+
+    <div class="scroll-x">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Tópico MQTT</th>
+            <th>Payload</th>
+            <th>Hora</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (entry of cmd.log(); track entry.id) {
+
+            <tr>
+
+              <td class="metric-value">
+                {{ entry.topic }}
+              </td>
+
+              <td class="metric-value">
+                {{ entry.payload }}
+              </td>
+
+              <td class="muted">
+                {{ time(entry.sentAt) }}
+              </td>
+
+              <td>
+
+                <span
+                  class="log-status"
+                  [class]="'log-status--' + entry.status"
+                >
+                  {{ statusLabel(entry.status) }}
+                </span>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+
+  <p class="log-note">
+    Os comandos são enviados pela API REST para o backend,
+    que os publica no broker MQTT para execução pelo ESP32.
+  </p>
+
+</div>

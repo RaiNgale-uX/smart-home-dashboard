@@ -1,0 +1,165 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.mode-body,
+.lamps-body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.segmented {
+  display: inline-flex;
+  align-self: flex-start;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.segmented-btn {
+  border: none;
+  background: transparent;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.segmented-btn.is-active {
+  background: var(--sidebar-bg);
+  color: #fff;
+}
+
+.mode-help {
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+  max-width: 46ch;
+}
+
+.lamp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.lamp-row:last-of-type {
+  border-bottom: none;
+}
+
+.lamp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.lamp-label {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.lamp-sub {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.switch {
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-sunken);
+  position: relative;
+  cursor: pointer;
+  flex: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease;
+}
+
+.switch.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch.is-on .switch-knob {
+  transform: translateX(18px);
+}
+
+.lamp-locked {
+  font-size: 12px;
+  color: var(--status-warning);
+  background: var(--status-warning-bg);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.log-card {
+  padding-bottom: 4px;
+}
+
+.log-empty {
+  padding: 24px 20px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.muted {
+  color: var(--text-secondary);
+}
+
+.log-status {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.log-status--pendente {
+  color: var(--status-normal);
+  background: var(--status-normal-bg);
+}
+
+.log-status--sem_endpoint {
+  color: var(--status-offline);
+  background: var(--status-offline-bg);
+}
+
+.log-status--erro {
+  color: var(--status-danger);
+  background: var(--status-danger-bg);
+}
+
+.log-note {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+}

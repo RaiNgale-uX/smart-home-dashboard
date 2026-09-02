@@ -1,0 +1,59 @@
+<app-page-header
+  eyebrow="Leituras instantâneas"
+  title="Sensores"
+  subtitle="Valores actuais reportados pelo ESP32 através de /api/v1/dashboard."
+>
+  <span class="updated-meta">Actualizado às {{ lastUpdateTime() }}</span>
+</app-page-header>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Leituras dos sensores</span>
+    <span class="card-subtitle">7 sensores instalados</span>
+  </div>
+  <div class="scroll-x">
+    <table>
+      <thead>
+        <tr>
+          <th>Sensor</th>
+          <th>Modelo</th>
+          <th>Valor</th>
+          <th>Estado</th>
+          <th>Observações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.name) {
+          <tr>
+            <td>{{ row.name }}</td>
+            <td class="muted">{{ row.model }}</td>
+            <td class="metric-value">
+              {{ row.value }}
+              @if (row.unit) { <span class="unit">{{ row.unit }}</span> }
+            </td>
+            <td><app-status-badge [level]="row.level" /></td>
+            <td class="muted note">{{ row.note ?? '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card diagnostic-card">
+  <div class="card-header">
+    <span class="card-title">Diagnóstico da ligação</span>
+    <span class="card-subtitle">GET /api/v1/db-test</span>
+  </div>
+  <div class="diagnostic-body">
+    <button class="btn" (click)="runDiagnostic()" [disabled]="diagnosticState() === 'loading'">
+      {{ diagnosticState() === 'loading' ? 'A testar…' : 'Testar ligação à base de dados' }}
+    </button>
+    @if (diagnosticState() === 'ok') {
+      <span class="diagnostic-result diagnostic-result--ok">{{ diagnosticMessage() }}</span>
+    }
+    @if (diagnosticState() === 'error') {
+      <span class="diagnostic-result diagnostic-result--error">{{ diagnosticMessage() }}</span>
+    }
+  </div>
+</div>

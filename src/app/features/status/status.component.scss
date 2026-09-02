@@ -1,0 +1,116 @@
+.offline-flag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--status-danger-bg);
+  color: var(--status-danger);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-strip {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 16px 22px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.status-strip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.status-strip-value {
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stale-flag {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--status-warning);
+  background: var(--status-warning-bg);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.status-strip-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--border);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.sensor-card--wide {
+  grid-column: span 2;
+}
+
+.sensor-body {
+  padding: 14px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sensor-value {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.unit {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+}
+
+.sensor-meta {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.sensor-body--split {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 26px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.sensor-body-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sensor-meta--source {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+@media (max-width: 720px) {
+  .sensor-card--wide { grid-column: span 1; }
+  .status-strip { gap: 16px; }
+  .status-strip-divider { display: none; }
+}

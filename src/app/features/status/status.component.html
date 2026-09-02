@@ -1,0 +1,104 @@
+<app-page-header
+  eyebrow="Painel principal"
+  title="Estado do Sistema"
+  subtitle="Resumo do modo, ligação, presença, iluminação, gás, água e temperatura."
+>
+  @if (!live.isOnline() && !live.isLoading()) {
+    <span class="offline-flag">Sem resposta da API</span>
+  }
+</app-page-header>
+
+<section class="status-strip">
+  <div class="status-strip-item">
+    <span class="eyebrow">Modo de operação</span>
+    <span class="status-strip-value">{{ modeLabel() }}</span>
+  </div>
+  <div class="status-strip-divider"></div>
+  <div class="status-strip-item">
+    <span class="eyebrow">Ligação</span>
+    <app-status-badge [level]="connectionLevel()" [label]="connectionLabel()" />
+  </div>
+  <div class="status-strip-divider"></div>
+  <div class="status-strip-item">
+    <span class="eyebrow">Última atualização</span>
+    <span class="status-strip-value metric-value">
+      {{ lastUpdateTime() }}
+      @if (dataIsStale() && live.isOnline()) {
+        <span class="stale-flag">desatualizado</span>
+      }
+    </span>
+  </div>
+  <div class="status-strip-divider"></div>
+  <div class="status-strip-item">
+    <span class="eyebrow">Climatização</span>
+    <span class="status-strip-value">{{ coolingLabel() }}</span>
+  </div>
+</section>
+
+<div class="grid">
+  <article class="card sensor-card">
+    <div class="card-header">
+      <span class="card-title">Presença e Movimento</span>
+      <app-status-badge [level]="presenceLevel()" />
+    </div>
+    <div class="sensor-body">
+      <span class="sensor-value">{{ presenceText() }}</span>
+      <span class="sensor-meta">PIR · HLK-LD2410</span>
+    </div>
+  </article>
+
+  <article class="card sensor-card">
+    <div class="card-header">
+      <span class="card-title">Iluminação</span>
+      <app-status-badge [level]="lightLevel()" />
+    </div>
+    <div class="sensor-body">
+      <span class="sensor-value metric-value">{{ luxValue() }}<span class="unit">lux</span></span>
+      <span class="sensor-meta">BH1750</span>
+    </div>
+  </article>
+
+  <article class="card sensor-card">
+    <div class="card-header">
+      <span class="card-title">Gás</span>
+      <app-status-badge [level]="gasLevel()" />
+    </div>
+    <div class="sensor-body">
+      <span class="sensor-value metric-value">{{ gasValue() }}<span class="unit">un.</span></span>
+      <span class="sensor-meta">MQ-6 · leitura bruta, sem calibração ppm</span>
+    </div>
+  </article>
+
+  <article class="card sensor-card">
+    <div class="card-header">
+      <span class="card-title">Fluxo de Água</span>
+      <app-status-badge level="offline" label="Não integrado" />
+    </div>
+    <div class="sensor-body">
+      <span class="sensor-value metric-value">—<span class="unit">L/min</span></span>
+      <span class="sensor-meta">Sensor de fluxo · fora do payload actual da API</span>
+    </div>
+  </article>
+
+  <article class="card sensor-card sensor-card--wide">
+    <div class="card-header">
+      <span class="card-title">Temperatura e Ambiente</span>
+      <app-status-badge [level]="tempLevel()" />
+    </div>
+    <div class="sensor-body sensor-body--split">
+      <div class="sensor-body-col">
+        <span class="sensor-value metric-value">{{ tempValue() }}<span class="unit">°C</span></span>
+        <span class="sensor-meta">Temperatura</span>
+      </div>
+      <div class="sensor-body-col">
+        <span class="sensor-value metric-value">{{ humidityValue() }}<span class="unit">%</span></span>
+        <span class="sensor-meta">Humidade</span>
+      </div>
+      <div class="sensor-body-col">
+        <span class="sensor-value metric-value">{{ pressureValue() }}<span class="unit">hPa</span></span>
+        <span class="sensor-meta">Pressão</span>
+      </div>
+      <span class="sensor-meta sensor-meta--source">BME280</span>
+    </div>
+  </article>
+</div>

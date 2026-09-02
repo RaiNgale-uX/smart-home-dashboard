@@ -1,0 +1,90 @@
+<app-page-header
+  eyebrow="Faturação e consumo"
+  title="Consumo Elétrico"
+  subtitle="Registe ou actualize o consumo semanal e mensal, em kWh."
+/>
+
+<div class="summary-grid">
+  <article class="card summary-card">
+    <span class="eyebrow">Consumo semanal</span>
+    <span class="summary-value metric-value">{{ weeklyLabel() }}</span>
+    <span class="summary-meta">Registado em {{ weeklyDate() }}</span>
+  </article>
+  <article class="card summary-card">
+    <span class="eyebrow">Consumo mensal</span>
+    <span class="summary-value metric-value">{{ monthlyLabel() }}</span>
+    <span class="summary-meta">Registado em {{ monthlyDate() }}</span>
+  </article>
+</div>
+
+<div class="card form-card">
+  <div class="card-header">
+    <span class="card-title">Novo registo</span>
+    <span class="card-subtitle">Entrada manual — função de correcção/teste</span>
+  </div>
+  <form class="form-body" (ngSubmit)="submit()">
+    <div class="field">
+      <label for="period">Período</label>
+      <select id="period" name="period" [ngModel]="period()" (ngModelChange)="period.set($event)">
+        <option value="semanal">Semanal</option>
+        <option value="mensal">Mensal</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="kwh">Consumo (kWh)</label>
+      <input
+        id="kwh"
+        name="kwh"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="0.00"
+        [ngModel]="kwh()"
+        (ngModelChange)="kwh.set($event)"
+      />
+    </div>
+    <button class="btn btn--accent" type="submit">Registar consumo</button>
+  </form>
+  @if (formError()) {
+    <p class="form-error">{{ formError() }}</p>
+  }
+</div>
+
+<div class="card history-card">
+  <div class="card-header">
+    <span class="card-title">Histórico de registos</span>
+    <span class="card-subtitle">Guardado localmente neste dispositivo</span>
+  </div>
+  @if (consumption.entries().length === 0) {
+    <p class="history-empty">Ainda não existem registos de consumo.</p>
+  } @else {
+    <div class="scroll-x">
+      <table>
+        <thead>
+          <tr>
+            <th>Período</th>
+            <th>Valor</th>
+            <th>Data e hora</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of consumption.entries(); track entry.id) {
+            <tr>
+              <td class="capitalize">{{ entry.period }}</td>
+              <td class="metric-value">{{ fmt(entry.kwh) }} <span class="unit">kWh</span></td>
+              <td class="muted">{{ date(entry.recordedAt) }}</td>
+              <td>
+                <button class="link-btn" (click)="remove(entry.id)">Remover</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+  <p class="history-note">
+    Quando a medição automática estiver disponível na API, este formulário deixa de ser a fonte principal
+    e passa a servir apenas para correcções pontuais, conforme a especificação.
+  </p>
+</div>

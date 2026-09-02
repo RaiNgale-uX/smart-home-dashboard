@@ -1,0 +1,79 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 11.5 12 5l8 6.5" />
+          <path d="M6 11v7.5a1 1 0 0 0 1 1h3.5v-5h3v5H17a1 1 0 0 0 1-1V11" />
+        </svg>
+      </span>
+      <div class="brand-text">
+        <span class="brand-title">Casa Inteligente</span>
+        <span class="brand-subtitle">Painel residencial</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      @for (item of navItems; track item.path) {
+        <a
+          class="nav-item"
+          [routerLink]="item.path"
+          routerLinkActive="is-active"
+        >
+          <span class="nav-icon">
+            @switch (item.icon) {
+              @case ('pulse') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12h4l2 7 4-14 2 7h6" />
+                </svg>
+              }
+              @case ('radar') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="2.2" />
+                  <path d="M7.5 12a4.5 4.5 0 0 1 9 0" />
+                  <path d="M4.5 12a7.5 7.5 0 0 1 15 0" />
+                  <path d="M12 4v-.5M12 20.5V20" />
+                </svg>
+              }
+              @case ('chart') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 19V5" />
+                  <path d="M4 19h16" />
+                  <path d="M7.5 16 11 11l3 3 4.5-6" />
+                </svg>
+              }
+              @case ('sliders') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 6h9M17.5 6H19" />
+                  <path d="M5 12h2.5M10 12H19" />
+                  <path d="M5 18h9M17.5 18H19" />
+                  <circle cx="11.5" cy="6" r="1.7" />
+                  <circle cx="8" cy="12" r="1.7" />
+                  <circle cx="13.5" cy="18" r="1.7" />
+                </svg>
+              }
+              @case ('bolt') {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12.5 3 5 13.5h5.5L11 21l7.5-10.5H13z" />
+                </svg>
+              }
+            }
+          </span>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="conn-pill" [class.is-online]="live.isOnline()">
+        <span class="conn-dot"></span>
+        {{ statusLabel() }}
+      </div>
+      <div class="conn-meta">Última leitura · {{ lastUpdatedLabel() }}</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <router-outlet />
+  </div>
+</div>

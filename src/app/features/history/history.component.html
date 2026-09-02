@@ -1,0 +1,87 @@
+<app-page-header
+  eyebrow="Séries temporais"
+  title="Histórico"
+  subtitle="Gráficos das medições ao longo do tempo, recolhidos nesta sessão do navegador desde as {{ sessionStartLabel }}."
+>
+  <div class="range-group">
+    @for (r of ranges; track r.key) {
+      <button
+        class="range-btn"
+        [class.is-active]="range() === r.key"
+        (click)="range.set(r.key)"
+      >
+        {{ r.label }}
+      </button>
+    }
+  </div>
+</app-page-header>
+
+@if (pointCount() < 2) {
+  <div class="card empty-card">
+    <p>Ainda não há pontos suficientes para desenhar os gráficos.</p>
+    <p class="empty-sub">Os dados são recolhidos automaticamente a cada leitura da API — volte dentro de alguns instantes.</p>
+  </div>
+} @else {
+  <div class="grid">
+    <article class="card chart-card">
+      <div class="card-header">
+        <div>
+          <span class="card-title">Temperatura</span>
+          <span class="card-subtitle">BME280</span>
+        </div>
+        <span class="chart-value metric-value">{{ latestTemp() }}<span class="unit">°C</span></span>
+      </div>
+      <div class="chart-body">
+        <app-line-chart [values]="temperatureSeries()" color="#b3352c" />
+      </div>
+    </article>
+
+    <article class="card chart-card">
+      <div class="card-header">
+        <div>
+          <span class="card-title">Iluminação</span>
+          <span class="card-subtitle">BH1750</span>
+        </div>
+        <span class="chart-value metric-value">{{ latestLux() }}<span class="unit">lux</span></span>
+      </div>
+      <div class="chart-body">
+        <app-line-chart [values]="luxSeries()" color="#b9701f" />
+      </div>
+    </article>
+
+    <article class="card chart-card">
+      <div class="card-header">
+        <div>
+          <span class="card-title">Gás (MQ-6)</span>
+          <span class="card-subtitle">leitura bruta</span>
+        </div>
+        <span class="chart-value metric-value">{{ latestGas() }}<span class="unit">un.</span></span>
+      </div>
+      <div class="chart-body">
+        <app-line-chart [values]="gasSeries()" color="#6b6f76" />
+      </div>
+    </article>
+
+    <article class="card chart-card">
+      <div class="card-header">
+        <div>
+          <span class="card-title">Humidade</span>
+          <span class="card-subtitle">BME280</span>
+        </div>
+        <span class="chart-value metric-value">{{ latestHumidity() }}<span class="unit">%</span></span>
+      </div>
+      <div class="chart-body">
+        <app-line-chart [values]="humiditySeries()" color="#2f6f93" />
+      </div>
+    </article>
+  </div>
+}
+
+<div class="footnote">
+  <p>
+    Fluxo de água e movimento ainda não têm série histórica — não constam do payload actual de
+    <code>/api/v1/dashboard</code>. O backend também não expõe um endpoint de histórico persistido;
+    esta página guarda os pontos localmente ({{ pointCount() }} nesta janela).
+  </p>
+  <button class="btn" (click)="clearHistory()">Limpar histórico local</button>
+</div>

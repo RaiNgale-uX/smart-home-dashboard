@@ -3,7 +3,9 @@ export type MqttTopic =
   | 'casa/cmd/luz_interior'
   | 'casa/cmd/alarme'
   | 'casa/cmd/ar'
-  | 'casa/cmd/modo';
+  | 'casa/cmd/modo'
+  | 'casa/cmd/lampada_sala'
+  | 'casa/cmd/lampada_quarto'
 
 export type CommandStatus = 'pendente' | 'sem_endpoint' | 'erro';
 

@@ -9,6 +9,8 @@ interface ControlState {
   mode: SystemMode;
   exteriorLamp: boolean;
   interiorLamp: boolean;
+  prototypeSala: boolean;
+  prototypeQuarto: boolean;
   ac: boolean;
 }
 
@@ -16,52 +18,71 @@ const DEFAULT_STATE: ControlState = {
   mode: 'AUTO',
   exteriorLamp: false,
   interiorLamp: false,
+  prototypeSala: false,
+  prototypeQuarto: false,
   ac: false
 };
 
 /**
- * A API documentada não expõe um endpoint REST para publicar comandos MQTT
- * (apenas os tópicos que o ESP32 escuta). Este serviço mantém a intenção do
- * utilizador localmente e tenta despachá-la para /api/v1/commands — a única
- * rota plausível caso um gateway REST→MQTT seja adicionado ao backend.
- * Quando o endpoint não existe, o comando fica registado como "sem_endpoint",
- * de forma transparente, em vez de simular uma confirmação falsa.
+ * Guarda a intenção de controlo no navegador e tenta enviá-la à API REST.
+ * IMPORTANTE: um HTTP 2xx não confirma que o ESP32 executou o comando.
+ * O backend precisa de implementar POST /api/v1/commands para encaminhar ao MQTT.
  */
 @Injectable({ providedIn: 'root' })
 export class CommandService {
   private readonly http = inject(HttpClient);
+  private readonly initial = this.loadState();
 
-  readonly mode = signal<SystemMode>(this.loadState().mode);
-  readonly exteriorLamp = signal<boolean>(this.loadState().exteriorLamp);
-  readonly interiorLamp = signal<boolean>(this.loadState().interiorLamp);
-  readonly ac = signal<boolean>(this.loadState().ac);
+  readonly mode = signal<SystemMode>(this.initial.mode);
+  readonly exteriorLamp = signal<boolean>(this.initial.exteriorLamp);
+  readonly interiorLamp = signal<boolean>(this.initial.interiorLamp);
+  readonly prototypeSala = signal<boolean>(this.initial.prototypeSala);
+  readonly prototypeQuarto = signal<boolean>(this.initial.prototypeQuarto);
+  readonly ac = signal<boolean>(this.initial.ac);
   readonly log = signal<CommandLogEntry[]>(this.loadLog());
 
-  setMode(mode: SystemMode) {
+  setMode(mode: SystemMode): void {
     this.mode.set(mode);
     this.persistState();
     this.dispatch('casa/cmd/modo', mode);
   }
 
-  setExteriorLamp(on: boolean) {
+  setExteriorLamp(on: boolean): void {
+    if (this.mode() !== 'MANUAL') return;
     this.exteriorLamp.set(on);
     this.persistState();
     this.dispatch('casa/cmd/iluminacao', on ? 'ON' : 'OFF');
   }
 
-  setInteriorLamp(on: boolean) {
+  setInteriorLamp(on: boolean): void {
+    if (this.mode() !== 'MANUAL') return;
     this.interiorLamp.set(on);
     this.persistState();
     this.dispatch('casa/cmd/luz_interior', on ? 'ON' : 'OFF');
   }
 
-  setAC(on: boolean) {
-  this.ac.set(on);
-  this.persistState();
-  this.dispatch('casa/cmd/ar', on ? 'ON' : 'OFF');
-}
+  setPrototypeSala(on: boolean): void {
+    if (this.mode() !== 'MANUAL') return;
+    this.prototypeSala.set(on);
+    this.persistState();
+    this.dispatch('casa/cmd/lampada_sala', on ? 'ON' : 'OFF');
+  }
 
-  private dispatch(topic: MqttTopic, payload: string) {
+  setPrototypeQuarto(on: boolean): void {
+    if (this.mode() !== 'MANUAL') return;
+    this.prototypeQuarto.set(on);
+    this.persistState();
+    this.dispatch('casa/cmd/lampada_quarto', on ? 'ON' : 'OFF');
+  }
+
+  setAC(on: boolean): void {
+    if (this.mode() !== 'MANUAL') return;
+    this.ac.set(on);
+    this.persistState();
+    this.dispatch('casa/cmd/ar', on ? 'ON' : 'OFF');
+  }
+
+  private dispatch(topic: MqttTopic, payload: string): void {
     const entry: CommandLogEntry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       topic,
@@ -69,57 +90,51 @@ export class CommandService {
       sentAt: new Date().toISOString(),
       status: 'pendente'
     };
-    this.log.update((l) => [entry, ...l].slice(0, 40));
+    this.log.update((items) => [entry, ...items].slice(0, 40));
     this.persistLog();
 
-    this.http
-      .post(`${API_BASE_URL}/api/v1/commands`, { topic, payload })
-      .pipe(
-        catchError(() => {
-          this.updateEntryStatus(entry.id, 'sem_endpoint');
-          return of(null);
-        })
-      )
-      .subscribe((res) => {
-        if (res !== null) this.updateEntryStatus(entry.id, 'pendente');
+    this.http.post(`${API_BASE_URL}/api/v1/commands`, { topic, payload })
+      .pipe(catchError((error) => {
+        // Um 404/405 costuma significar que a rota REST não existe.
+        this.updateEntryStatus(entry.id, error.status === 404 || error.status === 405 ? 'sem_endpoint' : 'erro');
+        return of(null);
+      }))
+      .subscribe(() => {
+        // 'pendente' significa apenas pedido enviado, não execução confirmada.
       });
   }
 
-  private updateEntryStatus(id: string, status: CommandLogEntry['status']) {
-    this.log.update((l) => l.map((e) => (e.id === id ? { ...e, status } : e)));
+  private updateEntryStatus(id: string, status: CommandLogEntry['status']): void {
+    this.log.update((items) => items.map((e) => e.id === id ? { ...e, status } : e));
     this.persistLog();
   }
 
-  private persistState() {
-  const state: ControlState = {
-    mode: this.mode(),
-    exteriorLamp: this.exteriorLamp(),
-    interiorLamp: this.interiorLamp(),
-    ac: this.ac()
-  };
-
-  try {
-    localStorage.setItem(
-      CONTROL_STATE_STORAGE_KEY,
-      JSON.stringify(state)
-    );
-  } catch {
-    /* noop */
+  private persistState(): void {
+    const state: ControlState = {
+      mode: this.mode(),
+      exteriorLamp: this.exteriorLamp(),
+      interiorLamp: this.interiorLamp(),
+      prototypeSala: this.prototypeSala(),
+      prototypeQuarto: this.prototypeQuarto(),
+      ac: this.ac()
+    };
+    try {
+      localStorage.setItem(CONTROL_STATE_STORAGE_KEY, JSON.stringify(state));
+    } catch { /* armazenamento indisponível */ }
   }
-}
 
-  private persistLog() {
+  private persistLog(): void {
     try {
       localStorage.setItem(COMMAND_LOG_STORAGE_KEY, JSON.stringify(this.log()));
-    } catch { /* noop */ }
+    } catch { /* armazenamento indisponível */ }
   }
 
   private loadState(): ControlState {
     try {
       const raw = localStorage.getItem(CONTROL_STATE_STORAGE_KEY);
-      return raw ? { ...DEFAULT_STATE, ...JSON.parse(raw) } : DEFAULT_STATE;
+      return raw ? { ...DEFAULT_STATE, ...JSON.parse(raw) } : { ...DEFAULT_STATE };
     } catch {
-      return DEFAULT_STATE;
+      return { ...DEFAULT_STATE };
     }
   }
 

@@ -1,3 +1,4 @@
+
 import { Component, computed, inject } from '@angular/core';
 
 import { CommandService } from '../../core/services/command.service';
@@ -25,24 +26,76 @@ export class ControlComponent {
   readonly cmd = inject(CommandService);
   readonly live = inject(LiveDataService);
 
-  readonly reportedMode = computed(() => this.live.snapshot()?.mode ?? '—');
-  readonly isManual = computed(() => this.cmd.mode() === 'MANUAL');
+  readonly reportedMode = computed(
+    () => this.live.snapshot()?.mode ?? '—'
+  );
+
+  readonly isManual = computed(
+    () => this.cmd.mode() === 'MANUAL'
+  );
+
+  // =========================================
+  // MODO DE OPERACAO
+  // =========================================
 
   setMode(mode: SystemMode) {
     this.cmd.setMode(mode);
   }
 
+  // =========================================
+  // ILUMINACAO EXISTENTE
+  // =========================================
+
   toggleExterior() {
-    this.cmd.setExteriorLamp(!this.cmd.exteriorLamp());
+    if (!this.isManual()) return;
+
+    this.cmd.setExteriorLamp(
+      !this.cmd.exteriorLamp()
+    );
   }
 
   toggleInterior() {
-    this.cmd.setInteriorLamp(!this.cmd.interiorLamp());
+    if (!this.isManual()) return;
+
+    this.cmd.setInteriorLamp(
+      !this.cmd.interiorLamp()
+    );
   }
 
+  // =========================================
+  // ILUMINACAO DO PROTOTIPO
+  // ESP32-S3: GPIO41 E GPIO42
+  // =========================================
+
+  togglePrototypeSala(): void {
+    if (!this.isManual()) return;
+
+    this.cmd.setPrototypeSala(
+      !this.cmd.prototypeSala()
+    );
+  }
+
+  togglePrototypeQuarto(): void {
+    if (!this.isManual()) return;
+
+    this.cmd.setPrototypeQuarto(
+      !this.cmd.prototypeQuarto()
+    );
+  }
+
+  // =========================================
+  // CLIMATIZACAO
+  // =========================================
+
   toggleAC() {
+    if (!this.isManual()) return;
+
     this.cmd.setAC(!this.cmd.ac());
   }
+
+  // =========================================
+  // REGISTO DE COMANDOS
+  // =========================================
 
   statusLabel(s: CommandStatus): string {
     return STATUS_LABEL[s];
